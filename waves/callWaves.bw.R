@@ -47,6 +47,21 @@ cleanup <- function(f.d.list) {
 dko.d <- cleanup(dko12m.d.list)
 wt.d <- cleanup(wt12m.d.list)
 
+## Compare distances in WT and DKO.
 hist(dko.d$Rate, 25)
 hist(wt.d$Rate, 25)
+
+dko.cdf <- ecdf(dko.d$Rate)
+wt.cdf  <- ecdf(wt.d$Rate)
+
+plot(dko.cdf, col="dark red", xlim=c(0, 75000), ylim=c(0,1))
+par(new=TRUE)
+plot(wt.cdf, col="black", xlim=c(0, 75000), ylim=c(0,1))
+
+boxplot(dko.d$Rate, wt.d$Rate)
+
+ks.test(dko.d$Rate, wt.d$Rate) ## NOT significant.
+wilcox.test(dko.d$Rate, wt.d$Rate) ## Means *ARE* significantly different.
+
+## Let's define genes that are direct HSF targets (in their promoter).
 
