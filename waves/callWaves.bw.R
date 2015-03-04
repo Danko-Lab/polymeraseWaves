@@ -5,49 +5,48 @@
 
 require(groHMM)
 require(bigWig)
-source("~/src/polymeraseWave.bw.R")
+source("../polymeraseWave.bw.R")
 
 ## BigWig files.
-pth <- "/home/cgd24/storage/home/work/jay/data/bigWigs/"
+pth <- "/home/cgd24/storage/home/work/polymeraseWaves/data/bigWigs/"
+
 wtNHSpl <- paste(pth,"WT_NHS_BRs_pl.bigWig",sep="")
 wtNHSmn <- paste(pth,"WT_NHS_BRs_mn.bigWig",sep="")
-wt12pl <- paste(pth,"WT_12HS_BRs_pl.bigWig",sep="")
-wt12mn <- paste(pth,"WT_12HS_BRs_mn.bigWig",sep="")
-wt60pl <- paste(pth,"WT_60HS_BRs_pl.bigWig",sep="")
-wt60mn <- paste(pth,"WT_60HS_BRs_mn.bigWig",sep="")
+wt12pl  <- paste(pth,"WT_12HS_BRs_pl.bigWig",sep="")
+wt12mn  <- paste(pth,"WT_12HS_BRs_mn.bigWig",sep="")
+
+dkoNHSpl <- paste(pth,"HsfDKO_NHS_BRs_pl.bigWig",sep="")
+dkoNHSmn <- paste(pth,"HsfDKO_NHS_BRs_mn.bigWig",sep="")
+dko12pl  <- paste(pth,"HsfDKO_12HS_BRs_pl.bigWig",sep="")
+dko12mn  <- paste(pth,"HsfDKO_12HS_BRs_mn.bigWig",sep="")
 
 ## Bed files.
-down <- read.table("../data/beds/DownRegGenes_WT_12minHS.bed")
-up   <- read.table("../data/beds/UpRegGenes_WT_12minHS.bed")
+readBed <- function(filename, minSize) {
+  dataf <- read.table(filename)
+  dataf <- dataf[(dataf[,3]-dataf[,2]) > minSize,]
+  dataf
+}
 
 minSize=60000
-down <- down[(down[,3]-down[,2]) > minSize,]
-up   <- up[(up[,3]-up[,2]) > minSize,]
+upwt <- readBed("../data/beds/UpRegGenes_WT_12minHS.bed", minSize)
+updko<- readBed("../data/beds/UpRegGenes_HsfDKO_12minHS.bed", minSize)
 
 ## Try to run it ... 
 # 12m
 approx=24000
-r12m.1.d <- polymeraseWaveBW(wt12pl, wt12mn, wtNHSpl, wtNHSmn, up[,c(1:3,6,4:5)], TSmooth= 20, approxDist=approx, returnVal="alldata", prefix="IMG/up.12m.")
+dko12m.d.list <- polymeraseWaveBW(dko12pl, dko12mn, dkoNHSpl, dkoNHSmn, updko[,c(1:3,6,4:5)], TSmooth= 20, approxDist=approx, returnVal="alldata", prefix="IMG/up.dko.12m.")
+wt12m.d.list <- polymeraseWaveBW(wt12pl, wt12mn, wtNHSpl, wtNHSmn, upwt[,c(1:3,6,4:5)], TSmooth= 20, approxDist=approx, returnVal="alldata", prefix="IMG/up.wt.12m.")
 
-# 60m
-approx=120000
-up   <- up[(up[,3]-up[,2]) > 150000,]
-r60m.1.d <- polymeraseWaveBW(wt60pl, wt60mn, wtNHSpl, wtNHSmn, up[c(1:3),c(1:3,6,4:5)], approxDist=approx, TSmooth= 20, returnVal="alldata", prefix="IMG/up.60m.")
+save.image("waves.12m.wt.dko.RData")
 
+cleanup <- function(f.d.list) {
+  f.d <- f.d.list[[NROW(f.d.list)]]
+  f.d[f.d$minOfMax & f.d$minOfAvg & f.d$KLdivParametric > 1,]
+}
 
-#r60m.1.d <- polymeraseWave(wtNr1, wt60r1, down[,c(1:3,6,4:5)], approxDist=approx, returnVal="alldata")
-#r60m.2.d <- polymeraseWave(wtNr2, wt60r2, down[,c(1:3,6,4:5)], approxDist=approx, returnVal="alldata")
+dko.d <- cleanup(dko12m.d.list)
+wt.d <- cleanup(wt12m.d.list)
 
-r12m.1.u <- polymeraseWave(wt12r1, wtNr1, up[,c(1:3,6,4:5)], approxDist=approx, returnVal="alldata")
-r12m.2.u <- polymeraseWave(wt12r2, wtNr2, up[,c(1:3,6,4:5)], approxDist=approx, returnVal="alldata")
-
-#r60m.1.u <- polymeraseWave(wt60r1, wtNr1, up[,c(1:3,6,4:5)], approxDist=approx, returnVal="alldata")
-#r60m.2.u <- polymeraseWave(wt60r2, wtNr2, up[,c(1:3,6,4:5)], approxDist=approx, returnVal="alldata")
-
-save.image("waves.RData")
-
-write.table(cbind(r12m.1.d[[1]], down[,c(1:3,6,4:5)]), "Rate.12m.DN.r1.Rflat")
-write.table(cbind(r12m.2.d[[1]], down[,c(1:3,6,4:5)]), "Rate.12m.DN.r2.Rflat")
-write.table(cbind(r12m.1.u[[1]], up[,c(1:3,6,4:5)]), "Rate.12m.UP.r1.Rflat")
-write.table(cbind(r12m.2.u[[1]], up[,c(1:3,6,4:5)]), "Rate.12m.UP.r2.Rflat")
+hist(dko.d$Rate, 25)
+hist(wt.d$Rate, 25)
 
