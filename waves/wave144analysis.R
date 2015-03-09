@@ -33,7 +33,7 @@ readBed <- function(filename, minSize) {
   dataf
 }
 
-cleanup <- function(f.d.list) {
+cleanup <- function(f.d) {
 #  f.d <- f.d.list[[NROW(f.d.list)]] ## ONLY used for alldata
   f.d[f.d$minOfMax & f.d$minOfAvg & f.d$KLdivParametric > 1,]
 }
