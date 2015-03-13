@@ -46,11 +46,11 @@ f144hs_WT_only     <- readBed(paste(bedPth, "144sHS_UpregGenes_WTonly.txt", sep=
 f144hs_HSF1ko_only <- readBed(paste(bedPth, "144sHS_UpregGenes_Hsf1KOonly.txt", sep=""), minSize=minSize)[,c(1:3,6,4:5)]
 
 approx=5000
-wt144_both <- polymeraseWaveBW(wt144pl, wt144mn, wtNHSpl, wtNHSmn, f144hs_WT_HSF1ko, TSmooth= 20, approxDist=approx, returnVal="simple", prefix=NULL)
-ko144_both <- polymeraseWaveBW(ko144pl, ko144mn, wtNHSpl, wtNHSmn, f144hs_WT_HSF1ko, TSmooth= 20, approxDist=approx, returnVal="simple", prefix=NULL)
+wt144_both <- polymeraseWaveBW(wt144pl, wt144mn, wtNHSpl, wtNHSmn, f144hs_WT_HSF1ko, TSmooth= 20, approxDist=approx, returnVal="simple", prefix="IMG/wt144_both.")
+ko144_both <- polymeraseWaveBW(ko144pl, ko144mn, wtNHSpl, wtNHSmn, f144hs_WT_HSF1ko, TSmooth= 20, approxDist=approx, returnVal="simple", prefix="IMG/ko144_both.")
 
-wt144_only <- polymeraseWaveBW(wt144pl, wt144mn, wtNHSpl, wtNHSmn, f144hs_WT_only, TSmooth= 20, approxDist=approx, returnVal="simple", prefix=NULL)
-ko144_only <- polymeraseWaveBW(ko144pl, ko144mn, wtNHSpl, wtNHSmn, f144hs_HSF1ko_only, TSmooth= 20, approxDist=approx, returnVal="simple", prefix=NULL)
+wt144_only <- polymeraseWaveBW(wt144pl, wt144mn, wtNHSpl, wtNHSmn, f144hs_WT_only, TSmooth= 20, approxDist=approx, returnVal="simple", prefix="IMG/wt144_only.")
+ko144_only <- polymeraseWaveBW(ko144pl, ko144mn, wtNHSpl, wtNHSmn, f144hs_HSF1ko_only, TSmooth= 20, approxDist=approx, returnVal="simple", prefix="IMG/ko144_only.")
 
 pdf("WTvHSF1KO.144s.pdf")
   hist(cleanup(wt144_both)$Rate, breaks=seq(0,40000,3000))
@@ -80,10 +80,10 @@ f12_AND_144.ko <- readBed(paste(bedPth, "12HS_and_144sHS_UpregGenes_Hsf1KO.txt",
 f12_NOT_144.ko <- readBed(paste(bedPth, "12HS_NOT_144sHS_UpregGenes_Hsf1KO.txt", sep=""), minSize=minSize)[,c(1:3,6,4:5)]
 
 ##
-r12_AND_144.wt <- polymeraseWaveBW(wt12pl, wt12mn, wtNHSpl, wtNHSmn, f12_AND_144.wt, TSmooth= 20, approxDist=approx, returnVal="simple", prefix=NULL)
-r12_NOT_144.wt <- polymeraseWaveBW(wt12pl, wt12mn, wtNHSpl, wtNHSmn, f12_NOT_144.wt, TSmooth= 20, approxDist=approx, returnVal="simple", prefix=NULL)
-r12_AND_144.ko <- polymeraseWaveBW(ko12pl, ko12mn, koNHSpl, koNHSmn, f12_AND_144.ko, TSmooth= 20, approxDist=approx, returnVal="simple", prefix=NULL)
-r12_NOT_144.ko <- polymeraseWaveBW(ko12pl, ko12mn, koNHSpl, koNHSmn, f12_NOT_144.ko, TSmooth= 20, approxDist=approx, returnVal="simple", prefix=NULL)
+r12_AND_144.wt <- polymeraseWaveBW(wt12pl, wt12mn, wtNHSpl, wtNHSmn, f12_AND_144.wt, TSmooth= 20, approxDist=approx, returnVal="simple", prefix="IMG/WT_12_AND_144.")
+r12_NOT_144.wt <- polymeraseWaveBW(wt12pl, wt12mn, wtNHSpl, wtNHSmn, f12_NOT_144.wt, TSmooth= 20, approxDist=approx, returnVal="simple", prefix="IMG/WT_12_NOT_144.")
+r12_AND_144.ko <- polymeraseWaveBW(ko12pl, ko12mn, koNHSpl, koNHSmn, f12_AND_144.ko, TSmooth= 20, approxDist=approx, returnVal="simple", prefix="IMG/KO_12_AND_144.")
+r12_NOT_144.ko <- polymeraseWaveBW(ko12pl, ko12mn, koNHSpl, koNHSmn, f12_NOT_144.ko, TSmooth= 20, approxDist=approx, returnVal="simple", prefix="IMG/KO_12_NOT_144.")
 
 ##
 pdf("144s_V_12m.pdf")
@@ -102,5 +102,18 @@ pdf("144s_V_12m.pdf")
   ks.test(cleanup(r12_AND_144.ko)$Rate, cleanup(r12_NOT_144.ko)$Rate) ## NOT significant.
 dev.off()
 #########################
+
+## Write out data...
+save.image("wave144data.RData")
+
+write.table(cbind(f144hs_WT_HSF1ko, wt144_both), "WT.144s.both.tsv", sep="\t", quote=FALSE, row.names=FALSE)
+write.table(cbind(f144hs_WT_HSF1ko, ko144_both), "KO.144s.both.tsv", sep="\t", quote=FALSE, row.names=FALSE)
+write.table(cbind(f144hs_WT_only, wt144_only), "WT.144s.only.tsv", sep="\t", quote=FALSE, row.names=FALSE)
+write.table(cbind(f144hs_HSF1ko_only, ko144_only), "KO.144s.only.tsv", sep="\t", quote=FALSE, row.names=FALSE)
+
+write.table(cbind(f12_AND_144.wt, r12_AND_144.wt), "WT.12_and_144.tsv", sep="\t", quote=FALSE, row.names=FALSE)
+write.table(cbind(f12_NOT_144.wt, r12_NOT_144.wt), "WT.12_not_144.tsv", sep="\t", quote=FALSE, row.names=FALSE)
+write.table(cbind(f12_AND_144.ko, r12_AND_144.ko), "KO.12_and_144.tsv", sep="\t", quote=FALSE, row.names=FALSE)
+write.table(cbind(f12_NOT_144.ko, r12_NOT_144.ko), "KO.12_not_144.tsv", sep="\t", quote=FALSE, row.names=FALSE)
 
 
