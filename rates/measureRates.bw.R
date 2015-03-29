@@ -38,25 +38,34 @@ updko<- readBed("../data/beds/UpRegGenes_HsfDKO_12minHS.bed", minSize)
 ## Try to run it ... 
 # 12m
 approx=24000
-dko12m.d.list <- polymeraseWaveBW(dko12pl, dko12mn, dkoNHSpl, dkoNHSmn, updko[,c(1:3,6,4:5)], TSmooth= 20, approxDist=approx, returnVal="alldata", prefix=NULL)
-wt12m.d.list <- polymeraseWaveBW(wt12pl, wt12mn, wtNHSpl, wtNHSmn, upwt[,c(1:3,6,4:5)], TSmooth= 20, approxDist=approx, returnVal="alldata", prefix=NULL)
+dko12m.d.list <- polymeraseWaveBW(dko12pl, dko12mn, dkoNHSpl, dkoNHSmn, updko[,c(1:3,6,4:5)], TSmooth= 20, approxDist=approx, returnVal="alldata", prefix="IMG/dko12.")
+wt12m.d.list <- polymeraseWaveBW(wt12pl, wt12mn, wtNHSpl, wtNHSmn, upwt[,c(1:3,6,4:5)], TSmooth= 20, approxDist=approx, returnVal="alldata", prefix="IMG/wt12.")
 
 approx=100000
-dko60m.d.list <- polymeraseWaveBW(dko60pl, dko60mn, dkoNHSpl, dkoNHSmn, updko[,c(1:3,6,4:5)], TSmooth= 20, approxDist=approx, returnVal="alldata", prefix=NULL)
-wt60m.d.list <- polymeraseWaveBW(wt60pl, wt60mn, wtNHSpl, wtNHSmn, upwt[,c(1:3,6,4:5)], TSmooth= 20, approxDist=approx, returnVal="alldata", prefix=NULL)
+dko60m.d.list <- polymeraseWaveBW(dko60pl, dko60mn, dkoNHSpl, dkoNHSmn, updko[,c(1:3,6,4:5)], TSmooth= 20, approxDist=approx, returnVal="alldata", prefix="IMG/dko60.")
+wt60m.d.list <- polymeraseWaveBW(wt60pl, wt60mn, wtNHSpl, wtNHSmn, upwt[,c(1:3,6,4:5)], TSmooth= 20, approxDist=approx, returnVal="alldata", prefix="IMG/wt60.")
 
 save.image("waves.12m.60m.wt.dko.RData")
 
-cleanup <- function(f.d.list) {
-  f.d <- f.d.list[[NROW(f.d.list)]]
-  f.d[f.d$minOfMax & f.d$minOfAvg & f.d$KLdivParametric > 1,]
+q("no")
+
+dko12m.d.list <- dko12m.d.list[[NROW(dko12m.d.list)]]
+wt12m.d.list <- wt12m.d.list[[NROW(wt12m.d.list)]]
+dko60m.d.list <- dko60m.d.list[[NROW(dko60m.d.list)]]
+wt60m.d.list <- wt60m.d.list[[NROW(wt60m.d.list)]]
+
+which.cleanup <- function(f.d) {
+  return(f.d$minOfMax & f.d$minOfAvg & f.d$KLdivParametric > 1)
 }
 
-dko.d <- cleanup(dko12m.d.list)
-wt.d <- cleanup(wt12m.d.list)
+dko.d <- which.cleanup(dko12m.d.list) & which.cleanup(dko60m.d.list)
+wt.d <- which.cleanup(wt12m.d.list) & which.cleanup(wt60m.d.list)
+
+rates.wt <- wt60m.d.list$EndWave - wt12m.d.list$EndWave
+rates.dko <- dko60m.d.list$EndWave - dko12m.d.list$EndWave
 
 ## Compare distances in WT and DKO.
-pdf("WTvDKO.pdf")
+pdf("WTvDKO.rates.pdf")
 
 par(mfrow=c(2,1))
 hist(dko.d$Rate, breaks=seq(0,75000,5000))
