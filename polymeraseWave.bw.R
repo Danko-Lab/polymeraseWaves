@@ -165,8 +165,8 @@ polymeraseWaveBW <- function(reads1_plus, reads1_minus, reads2_plus, reads2_minu
     Fp2 <- load.bigWig(reads2_plus)
     Fm1 <- load.bigWig(reads1_minus)
     Fm2 <- load.bigWig(reads2_minus)
-    sizeP1 <- NROW(Fp1$mean*Fp1$basesCovered+abs(Fm1$mean)*Fm1$basesCovered)
-    sizeP2 <- NROW(Fp2$mean*Fp2$basesCovered+abs(Fm2$mean)*Fm2$basesCovered)
+    sizeP1 <- Fp1$mean*Fp1$basesCovered+abs(Fm1$mean)*Fm1$basesCovered
+    sizeP2 <- Fp2$mean*Fp2$basesCovered+abs(Fm2$mean)*Fm2$basesCovered
     expCounts <- mean(sizeP1,sizeP2)
 
     ANS <- rep(-1, NROW(genes))
